@@ -15,6 +15,7 @@ cd build && node server.js
 
 # Mod JSON format
 
+```json
 {
   "title": "",
   "channelCount": 8,
@@ -70,3 +71,4 @@ cd build && node server.js
   "version": 1,
   "format": "mod"
 }
+```
