@@ -1,7 +1,7 @@
 {
   "dependencies": {
     "@keyv/sqlite": "3.5.0",
-    "concurrently": "^6.3.0",
+    "concurrently": "7.5.0",
     "cookie-parser": "1.4.5",
     "csurf": "1.11.0",
     "express": "4.17.1",
@@ -18,7 +18,7 @@
     "react": "16.13.0",
     "react-dom": "16.13.0",
     "rotating-file-stream": "2.1.6",
-    "shadow-cljs": "^2.15.12",
+    "shadow-cljs": "2.20.12",
     "sitefox": "github:chr15m/sitefox",
     "sqlite3": "5.0.2"
   }
