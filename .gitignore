@@ -1,0 +1,9 @@
+.*.swp
+.shadow-cljs
+devserver.js
+public/js
+database.sqlite
+logs
+node_modules
+package-lock.json
+pnpm-lock.yaml
