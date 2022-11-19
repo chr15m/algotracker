@@ -1,5 +1,6 @@
 .*.swp
 .shadow-cljs
+.clj-kondo/.cache
 devserver.js
 public/js
 database.sqlite
