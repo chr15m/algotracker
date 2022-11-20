@@ -15,6 +15,8 @@ cd build && node server.js
 
 # Mod JSON format
 
+* [Protracker Module](https://wiki.multimedia.cx/index.php/Protracker_Module).
+
 ```json
 {
   "title": "",
