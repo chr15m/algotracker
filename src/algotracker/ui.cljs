@@ -2,23 +2,16 @@
   (:require [reagent.core :as r]
             [reagent.dom :as rdom]
             ["txt-tracker/savers/mod" :as save-mod]
+            ["txt-tracker/loaders/json" :as load-json]
+
             [shadow.resource :as rc]))
 
 (defonce state (r/atom {}))
 
-(defn fix-pcm [mod-data]
-  (.map (aget mod-data "samples")
-        (fn [sample]
-          (js/console.log (aget sample "name"))
-          (let [pcm (aget sample "pcm")]
-            (when pcm
-              (aset pcm "length" (aget sample "length"))))))
-  mod-data)
 
 (defn component-main [_state]
-  (let [mod-data (-> (rc/inline "2s-library.mod.json")
-                   js/JSON.parse
-                   fix-pcm
+  (let [mod-data (-> (rc/inline "small.mod.json")
+                   load-json
                    save-mod)
         mod-file (js/File. #js [mod-data] #js {:name "test.mod" :content-type "audio/x-mod"})]
     [:div
