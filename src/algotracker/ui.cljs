@@ -31,7 +31,7 @@
     [:div
      [:h1 "algotracker"]
      [:p "Algorithmically generating tracker music."]
-     [:a {:href (js/URL.createObjectURL mod-file) :download "test.mod"} [:button "download generated mod"]]]))
+     [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"]]))
 
 (defn start {:dev/after-load true} []
   (p/let [res (.then mpt-promise)]
