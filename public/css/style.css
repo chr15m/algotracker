@@ -1,13 +1,37 @@
-html, body, #app, #loading {
+@import url('fonts/anka-coder.css');
+@import url('fonts/orbitron.css');
+
+* {
+  font-family: "AnkaCoderRegular";
+}
+
+html, body, main, #loading {
   height: 100%;
+  background-color: #010702;
+  color: #FFF4F4;
+}
+
+h1 {
+  font-family: "Orbitron";
 }
 
 body {
   max-width: 100%;
   width: 800px;
-  font-family: Helvetica, Arial, sans-serif;
   margin: auto;
 }
+
+pre {
+  white-space: pre-wrap;
+}
+
+a {
+  color: #A3DDC9;
+  font-weight: bold;
+  font-family: "AnkaCoderBold";
+}
+
+/*** loader ***/
 
 #loading {
   display: flex;
@@ -23,10 +47,6 @@ body {
   border: 3px solid transparent;
   border-left: 3px solid silver;
   border-right: 3px solid silver;
-}
-
-pre {
-  white-space: pre-wrap;
 }
 
 @keyframes spin {
