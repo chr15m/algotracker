@@ -49,11 +49,11 @@
         module (load-mod mod-data)
         metadata (get-metadata module)]
     [:div
-     [:h1 "algotracker"]
-     [:p "Algorithmically generating tracker music."]
-     [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"]
+     [:h1 "ÄlgoTracker"]
+     [:p "Algorithmic tracker music generator. It does not do anything yet."]
      [:h3 "small.mod"]
-     [:pre (js/JSON.stringify metadata nil 2)]]))
+     [:pre (js/JSON.stringify metadata nil 2)]
+     [:p "download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"]]]))
 
 (defn start {:dev/after-load true} []
   (p/let [res (.then mpt-promise)]
