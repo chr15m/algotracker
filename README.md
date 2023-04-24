@@ -31,7 +31,8 @@ cd build && node server.js
   "samples": [
     {
       "name": "000000156.wav",
-      "pcm": [...],
+      "pcm": [0, 0, ..., 0],
+      "wave": "...instead of pcm: Base64 encoded wave data...",
       "length": 5502,
       "volume": 1,
       "loopStart": 0,
