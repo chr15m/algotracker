@@ -1,6 +1,7 @@
 {
   "dependencies": {
     "@keyv/sqlite": "3.5.0",
+    "chiptune2.js.git": "github:deskjet/chiptune2.js",
     "concurrently": "7.5.0",
     "cookie-parser": "1.4.5",
     "csurf": "1.11.0",
@@ -15,12 +16,12 @@
     "nodemailer": "6.6.5",
     "passport": "0.5.2",
     "passport-local": "1.0.0",
-    "react": "16.13.0",
-    "react-dom": "16.13.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2",
     "rotating-file-stream": "2.1.6",
     "shadow-cljs": "2.20.12",
-    "sitefox": "github:chr15m/sitefox",
+    "sitefox": "github:chr15m/sitefox#2a7528c8",
     "sqlite3": "5.0.2",
-    "txt-tracker": "^0.4.0"
+    "txt-tracker": "0.4.0"
   }
 }

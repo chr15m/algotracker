@@ -5,14 +5,14 @@ all: build build/server.js
 build/server.js: src/**/*.cljs shadow-cljs.edn node_modules
 	npx shadow-cljs release server --debug
 
-build: src/**/* $(STATIC)
+build: src/**/* $(STATIC) node_modules
 	mkdir -p build/public
 	cp -LR --preserve=all $(STATIC) build/public
 	npx shadow-cljs release app
 	touch build
 
 node_modules: package.json
-	pnpm i
+	pnpm i --no-lockfile --shamefully-hoist
 	touch node_modules
 
 .PHONY: watch watcher server repl clean
@@ -22,7 +22,7 @@ server: node_modules
 	@rm -f devserver.js; until [ -f devserver.js -a -d .shadow-cljs ]; do sleep 1; done; echo "devserver.js appeared. starting."
 	@sleep 1 && while [ 1 ]; do DEV=1 node devserver.js; sleep 3; echo "restarting devserver.js"; done
 
-watcher:
+watcher: node_modules
 	npx shadow-cljs watch server app
 
 watch:
