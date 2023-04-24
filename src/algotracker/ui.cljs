@@ -1,5 +1,6 @@
 (ns algotracker.ui
   (:require [applied-science.js-interop :as j]
+            [promesa.core :as p]
             [reagent.core :as r]
             [reagent.dom :as rdom]
             ["txt-tracker/savers/mod" :as save-mod]
@@ -8,14 +9,19 @@
 
 (defonce state (r/atom {}))
 
-(j/assoc! js/window :libopenmpt
-          #js {:locateFile (fn [filename] (str "chiptune2.js.git/" filename))
-               :onRuntimeInitialized (fn []
-                                       (js/console.log "libopenmpt initialized")
-                                       (js/console.log "libopenmpt Library version:"
-                                                       (js/libopenmpt.ccall "openmpt_get_string" "string" #js ["string"] #js ["library_version"]))
-                                       (js/console.log "libopenmpt Core version:"
-                                                       (js/libopenmpt.ccall "openmpt_get_string" "string" #js ["string"] #js ["core_version"])))})
+(defonce mpt-promise
+  (js/Promise.
+    (fn [res _err]
+      (j/assoc! js/window :libopenmpt
+                #js {:locateFile (fn [filename] (str "chiptune2.js.git/" filename))
+                     :onRuntimeInitialized (fn []
+                                             (js/console.log "libopenmpt initialized")
+                                             (js/console.log js/libopenmpt)
+                                             (js/console.log "libopenmpt Library version:"
+                                                             (js/libopenmpt.ccall "openmpt_get_string" "string" #js ["string"] #js ["library_version"]))
+                                             (js/console.log "libopenmpt Core version:"
+                                                             (js/libopenmpt.ccall "openmpt_get_string" "string" #js ["string"] #js ["core_version"]))
+                                             (res js/libopenmpt))}))))
 
 (defn component-main [_state]
   (let [mod-data (-> (rc/inline "small.mod.json")
@@ -28,8 +34,10 @@
      [:a {:href (js/URL.createObjectURL mod-file) :download "test.mod"} [:button "download generated mod"]]]))
 
 (defn start {:dev/after-load true} []
-  (rdom/render [component-main state]
-               (js/document.getElementById "app")))
+  (p/let [res (.then mpt-promise)]
+    (js/console.log "libopenmpt resolved:" res)
+    (rdom/render [component-main state]
+                 (js/document.getElementById "app"))))
 
 (defn main! []
   (start))
