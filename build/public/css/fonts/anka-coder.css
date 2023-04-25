@@ -1,0 +1,31 @@
+@font-face {
+  font-family: 'AnkaCoderBold';
+  src: url('AnkaCoder-b.ttf') format('truetype');
+  font-weight: bold;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnkaCoderBoldItalic';
+  src: url('AnkaCoder-bi.ttf') format('truetype');
+  font-weight: bold;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnkaCoderItalic';
+  src: url('AnkaCoder-i.ttf') format('truetype');
+  font-weight: normal;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'AnkaCoderRegular';
+  src: url('AnkaCoder-r.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
