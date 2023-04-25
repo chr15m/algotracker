@@ -1,4 +1,4 @@
-STATIC=public/*.html public/css # public/images public/assets
+STATIC=public/*.html public/css public/chiptune2.js public/img # public/images public/assets
 
 all: build build/server.js
 
@@ -7,7 +7,7 @@ build/server.js: src/**/*.cljs shadow-cljs.edn node_modules
 
 build: src/**/* $(STATIC) node_modules
 	mkdir -p build/public
-	cp -LR --preserve=all $(STATIC) build/public
+	rsync -rvL --exclude=.git $(STATIC) build/public
 	npx shadow-cljs release app
 	touch build
 
