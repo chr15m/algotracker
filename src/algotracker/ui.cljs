@@ -13,7 +13,7 @@
   (js/Promise.
     (fn [res _err]
       (j/assoc! js/window :libopenmpt
-                #js {:locateFile (fn [filename] (str "chiptune2.js.git/" filename))
+                #js {:locateFile (fn [filename] (str "chiptune2.js/" filename))
                      :onRuntimeInitialized (fn []
                                              (js/console.log "libopenmpt initialized")
                                              (js/console.log js/libopenmpt)

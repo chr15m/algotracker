@@ -15,14 +15,17 @@ node_modules: package.json
 	pnpm i --no-lockfile --shamefully-hoist
 	touch node_modules
 
+chiptune2.js:
+	git clone https://github.com/deskjet/chiptune2.js.git
+
 .PHONY: watch watcher server repl clean
 
-server: node_modules
+server: node_modules chiptune2.js
 	@echo "waiting for devserver.js to appear."
 	@rm -f devserver.js; until [ -f devserver.js -a -d .shadow-cljs ]; do sleep 1; done; echo "devserver.js appeared. starting."
 	@sleep 1 && while [ 1 ]; do DEV=1 node devserver.js; sleep 3; echo "restarting devserver.js"; done
 
-watcher: node_modules
+watcher: node_modules chiptune2.js
 	npx shadow-cljs watch server app
 
 watch:

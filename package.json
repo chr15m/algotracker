@@ -1,7 +1,6 @@
 {
   "dependencies": {
     "@keyv/sqlite": "3.5.0",
-    "chiptune2.js.git": "github:deskjet/chiptune2.js",
     "concurrently": "7.5.0",
     "cookie-parser": "1.4.5",
     "csurf": "1.11.0",

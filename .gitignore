@@ -6,5 +6,6 @@ public/js
 database.sqlite
 logs
 node_modules
+/chiptune2.js
 package-lock.json
 pnpm-lock.yaml
