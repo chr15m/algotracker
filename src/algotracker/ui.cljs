@@ -5,6 +5,7 @@
             [reagent.dom :as rdom]
             ["txt-tracker/savers/mod" :as save-mod]
             ["txt-tracker/loaders/json" :as load-json]
+            ["wavefile" :refer [WaveFile]]
             [shadow.resource :as rc]))
 
 (defonce state (r/atom {}))
@@ -46,7 +47,6 @@
   (.time js/console "render-song")
   (let [sample-rate 44100
         song-duration-seconds (get-duration mod-ptr)
-        ;max-frames-per-chunk 4096
         frame-count (* sample-rate song-duration-seconds)
         mptbuffer-ptrs (map (fn [_i] (._malloc js/libopenmpt (* 4 frame-count))) (range 2))
         actual-frames (._openmpt_module_read_float_stereo js/libopenmpt mod-ptr 44100 frame-count (first mptbuffer-ptrs) (second mptbuffer-ptrs))
@@ -58,14 +58,23 @@
     (.timeEnd js/console "render-song")
     raw-audio-arrays))
 
-(defn component-main [_state mod-file metadata duration]
+(defn buffers-to-wave [buffers]
+  (let [w (WaveFile.)]
+    (js/console.log "wav" w)
+    (.fromScratch
+      w 2 44100 "32f"
+      #js [(first buffers) (second buffers)])
+    w))
+
+(defn component-main [_state mod-file metadata duration wav]
   (let []
     [:div
      [:h1 "ÄlgoTracker"]
      [:p "Algorithmic tracker music generator. It does not do anything yet."]
      [:h3 "small.mod (" duration "s)"]
      [:pre (js/JSON.stringify metadata nil 2)]
-     [:p "download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"]]]))
+     [:p "download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"]]
+     [:audio {:src (.toDataURI wav) :controls true :loop true}]]))
 
 (defn start {:dev/after-load true} []
   (p/let [res (.then mpt-promise)
@@ -79,11 +88,12 @@
           module (load-mod mod-data)
           metadata (get-metadata module)
           duration (get-duration module)
-          rendered (render-song module)]
+          rendered (render-song module)
+          wav (buffers-to-wave rendered)]
     ; clean up
     (._openmpt_module_destroy js/libopenmpt module)
     (js/console.log "raw-audio" (clj->js rendered))
-    (rdom/render [component-main state mod-file metadata duration]
+    (rdom/render [component-main state mod-file metadata duration wav]
                  (js/document.getElementById "app"))))
 
 (defn main! []

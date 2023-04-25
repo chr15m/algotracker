@@ -21,6 +21,7 @@
     "shadow-cljs": "2.20.12",
     "sitefox": "github:chr15m/sitefox#2a7528c8",
     "sqlite3": "5.0.2",
-    "txt-tracker": "0.4.0"
+    "txt-tracker": "0.4.0",
+    "wavefile": "^11.0.0"
   }
 }
