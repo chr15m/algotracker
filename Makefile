@@ -8,7 +8,7 @@ build/server.js: src/**/*.cljs shadow-cljs.edn node_modules
 build: src/**/* $(STATIC) node_modules
 	mkdir -p build/public
 	rsync -rvL --exclude=.git $(STATIC) build/public
-	npx shadow-cljs release app
+	npx shadow-cljs release bootstrap app
 	touch build
 
 node_modules: package.json
@@ -26,7 +26,7 @@ server: node_modules chiptune2.js
 	@sleep 1 && while [ 1 ]; do DEV=1 node devserver.js; sleep 3; echo "restarting devserver.js"; done
 
 watcher: node_modules chiptune2.js
-	npx shadow-cljs watch server app
+	npx shadow-cljs watch server bootstrap app
 
 watch:
 	make -j2 watcher server

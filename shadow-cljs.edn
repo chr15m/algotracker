@@ -11,5 +11,11 @@
                 :asset-path "/js"
                 :modules {:main {:init-fn algotracker.ui/main!}}
                 :devtools {:watch-dir "public"}
-                :release {:output-dir "build/public/js"}}}}
+                :release {:output-dir "build/public/js"}}
+          :bootstrap {:target :bootstrap
+                      :output-dir "public/bootstrap"
+                      :release {:output-dir "build/public/bootstrap"}
+                      :exclude #{cljs.js}
+                      :entries [cljs.js #_ demo.macro reagent.core]
+                      :macros []}}}
 
