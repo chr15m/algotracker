@@ -7,7 +7,7 @@
             ["txt-tracker/loaders/json" :as load-json]
             [shadow.resource :as rc]
             [algotracker.openmpt :refer [mpt-promise load-mod get-metadata get-duration render-song buffers-to-wave]]
-            [algotracker.runner :refer [compile-code]]))
+            #_ [algotracker.runner :refer [compile-code]]))
 
 (defonce state (r/atom {}))
 
@@ -37,9 +37,9 @@
    [:pre (js/JSON.stringify metadata nil 2)]])
 
 (defn start {:dev/after-load true} []
-  (p/let [test-code (rc/inline "test-code.cljs")
-          {:keys [value _error] :as _result} (compile-code test-code)
-          _ (js/console.log (value.hullo "balls"))
+  (p/let [;test-code (rc/inline "test-code.cljs")
+          ;{:keys [value _error] :as _result} (compile-code test-code)
+          ;_ (js/console.log (value.hullo "balls"))
           res (.then mpt-promise)
           _ (js/console.log "libopenmpt loaded:" res)
           mod-json (rc/inline "small.mod.json")
