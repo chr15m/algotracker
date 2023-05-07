@@ -29,8 +29,6 @@
     (-> file .-lastModified js/Date. .getTime)
     0))
 
-(swap! state dissoc :file :last)
-
 (defn filewatcher [state]
   (let [file (@state :file)
         last-mod (@state :last)]
@@ -57,9 +55,10 @@
                       (print "New generator cljs file loaded.")
                       (print _result)
                       (swap! state assoc :last (or updated last-mod) :ui (j/get value :ui))
-                      (when value
-                        (value.hello "testing")
-                        (print (value.other)))))))))
+                      ;(j/call value :make-sample-set state)
+                      ;(j/call value :make-pattern-settings state)
+                      ;(j/call value :make-patterns state)
+                      ))))))
 
 (defn file-selected! [state ev]
   (let [input (.. ev -target)
@@ -94,7 +93,12 @@
               :name "watcher"
               :accept ".cljs"
               :on-change #(file-selected! state %)}]]
-    [:a {:href "#"} "Download template.cljs"]]])
+    [:a {:download "template.cljs"
+         :href (js/URL.createObjectURL
+                 (js/File.
+                   #js [(rc/inline "template.cljs")]
+                   #js {:content-type "text/plain"}))}
+     "Download template.cljs"]]])
 
 (defn start {:dev/after-load true} []
   (p/let [res (.then mpt-promise)
