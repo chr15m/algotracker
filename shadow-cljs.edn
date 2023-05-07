@@ -9,6 +9,9 @@
           :app {:target :browser
                 :output-dir "public/js"
                 :asset-path "/js"
+                :compiler-options
+                {:optimizations :simple
+                 :output-wrapper false}
                 :modules {:main {:init-fn algotracker.ui/main!}}
                 :devtools {:watch-dir "public"}
                 :release {:output-dir "build/public/js"}}
