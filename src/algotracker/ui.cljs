@@ -5,18 +5,77 @@
             [reagent.dom :as rdom]
             ["txt-tracker/savers/mod" :as save-mod]
             ["txt-tracker/loaders/json" :as load-json]
+            ["crypto-js/sha512" :as sha512]
+            ["crypto-js/enc-hex" :as enc-hex]
             [shadow.resource :as rc]
             [algotracker.openmpt :refer [mpt-promise load-mod get-metadata get-duration render-song buffers-to-wave]]
             [algotracker.runner :refer [compile-code]]))
 
 (defonce state (r/atom {}))
 
-#_ (def generators
-  {:2-step-beat
-   {:ui (fn [_context _id])
-    :make-sample-set (fn [_context _id])
-    :make-pattern-settings (fn [_context _id])
-    :make-patterns (fn [_context _id])}})
+(defn sha512-string [s]
+  (.stringify enc-hex (sha512 s)))
+
+(defn read-file [file]
+  (js/Promise.
+    (fn [res err]
+      (let [reader (js/FileReader.)]
+        (aset reader "onload" #(res (.. % -target -result)))
+        (aset reader "onerror" #(err "FileReader error" %))
+        (.readAsText reader file "utf-8")))))
+
+(defn get-file-time [file]
+  (if file
+    (-> file .-lastModified js/Date. .getTime)
+    0))
+
+(swap! state dissoc :file :last)
+
+(defn filewatcher [state]
+  (let [file (@state :file)
+        last-mod (@state :last)]
+    (when file
+      (p/let [[content updated]
+              (if (aget file "text")
+                ; firefox (lastModified does not update)
+                ; and FileReader produces errors on changed file
+                ; so use sha512 hash of file instead
+                (p/let [content (.text file)
+                        updated (sha512-string content)]
+                  (when (not= updated last-mod)
+                    (js/console.log "read file (firefox method):" content)
+                    [content updated]))
+                ; chrome - can re-read the modified file without errors
+                (p/let [updated (get-file-time file)]
+                  (when (not= updated last-mod)
+                    (p/let [content (read-file file)]
+                      (js/console.log "read file (chrome method):" content)
+                      [content updated]))))
+              {:keys [value error] :as _result} (when content (compile-code content))]
+        (cond error (throw error)
+              value (do
+                      (print _result)
+                      (when updated (swap! state assoc :last updated))
+                      (when value
+                        (value.hello "testing")
+                        (print (value.other)))))))))
+
+(defn file-selected! [state ev]
+  (let [input (.. ev -target)
+        file (and (.-files input)
+                  (aget (.-files input) 0))]
+    (js/console.log "Loading:" file)
+    (swap! state assoc :file file)
+    (filewatcher state)))
+
+#_ (defn watch-cljs-file [ev]
+  (js/console.log ev)
+  (js/console.log (-> ev .-target .-files))
+  #_ (p/let [files (-> ev .-target .-files)
+             file (first files)
+             test-code (rc/inline "test-code.cljs")
+             {:keys [value _error] :as _result} (compile-code test-code)]
+       (js/console.log (value.hullo "thingo"))))
 
 (defn component-main [_state mod-file metadata duration json-file wav-data-uri]
   [:div
@@ -32,15 +91,19 @@
     "Generated from " [:a {:href (js/URL.createObjectURL json-file) :download "small.mod.json"} "small.mod.json"] ". "
     "Download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"] ". "
     "Download " [:a {:href wav-data-uri :download "small.wav"} "small.wav"] "."]
-   [:p ]
    [:audio {:src wav-data-uri :controls true :loop true}]
-   [:pre (js/JSON.stringify metadata nil 2)]])
+   [:pre (js/JSON.stringify metadata nil 2)]
+   [:div
+    [:label {:for "watcher"}
+     [:p "Open .cljs file"]
+     [:input {:type :file
+              :name "watcher"
+              :accept ".cljs"
+              :on-change #(file-selected! state %)}]]
+    [:a {:href "#"} "Download template.cljs"]]])
 
 (defn start {:dev/after-load true} []
-  (p/let [test-code (rc/inline "test-code.cljs")
-          {:keys [value _error] :as _result} (compile-code test-code)
-          _ (js/console.log (value.hullo "thingo"))
-          res (.then mpt-promise)
+  (p/let [res (.then mpt-promise)
           _ (js/console.log "libopenmpt loaded:" res)
           mod-json (rc/inline "small.mod.json")
           mod-data (->
@@ -62,4 +125,6 @@
                  (js/document.getElementById "app"))))
 
 (defn main! []
+  ; TODO: wait for promises to prevent parallel runs
+  (js/setInterval #(filewatcher state) 100)
   (start))

@@ -11,8 +11,8 @@
 (defn compile-it [code]
   (js/Promise.
     (fn [res _err]
-      (js/console.log "Running code:")
-      (js/console.log code)
+      (js/console.log "Running updated code.")
+      ;(js/console.log code)
       (cljs/eval-str
         @compile-state-ref
         code
@@ -28,6 +28,7 @@
              (fn [c]
                (if (nil? c) 
                  (let [new-compiler (env/default-compiler-env)]
+                   (js/console.log "Bootstrapping compiler.")
                    (boot/init new-compiler
                               {:path "bootstrap"}
                               res)
