@@ -24,10 +24,41 @@
         (j/assoc! reader :onerror #(err "FileReader error" %))
         (.readAsText reader file "utf-8")))))
 
+(defn render-mod [mod-json]
+  (p/let [mod-data (->
+                     mod-json
+                     load-json
+                     save-mod)
+          mod-file (js/File. #js [mod-data] #js {:name "small.mod" :content-type "audio/x-mod"})
+          json-file (js/File. #js [mod-json] #js {:name "small.mod.json" :content-type "application/json"})
+          module (load-mod mod-data)
+          metadata (get-metadata module)
+          duration (get-duration module)
+          rendered (render-song module)
+          wav (buffers-to-wave rendered)
+          wav-data-uri (.toDataURI wav)]
+    (._openmpt_module_destroy js/libopenmpt module)
+    (js/console.log "raw-audio" (clj->js rendered))
+    [mod-file metadata duration json-file wav-data-uri]))
+
 (defn get-file-time [file]
   (if file
     (-> file .-lastModified js/Date. .getTime)
     0))
+
+(defn process-patterns [patterns]
+  (clj->js
+    [(map
+       (fn [i]
+         (for [pattern patterns]
+           (let [cell (nth pattern i)]
+             (merge
+               {:note :C-6
+                :semitone 60
+                :sample 0
+                :fx 0x000}
+               cell))))
+       (range 64))]))
 
 (defn filewatcher [state]
   (let [file (@state :file)
@@ -51,13 +82,20 @@
                       [content updated]))))
               {:keys [value error] :as _result} (when content (compile-code content))]
         (cond error (throw error)
-              value (do
+              value (p/let [mod-json-original (rc/inline "small.mod.json")
+                            mod-json (js/JSON.parse mod-json-original)
+                            patterns (j/call value :make-patterns state)
+                            mod-json (j/assoc! mod-json :tables (process-patterns patterns))
+                            mod-json (j/assoc! mod-json :channelCount (count patterns))
+                            mod-json (j/assoc! mod-json)
+                            render (render-mod (js/JSON.stringify mod-json))]
                       (print "New generator cljs file loaded.")
+                      (js/console.log (js/JSON.parse mod-json-original))
+                      (js/console.log mod-json)
                       (print _result)
-                      (swap! state assoc :last (or updated last-mod) :ui (j/get value :ui))
+                      (swap! state assoc :last (or updated last-mod) :ui (j/get value :ui) :render render)
                       ;(j/call value :make-sample-set state)
                       ;(j/call value :make-pattern-settings state)
-                      ;(j/call value :make-patterns state)
                       ))))))
 
 (defn file-selected! [state ev]
@@ -67,7 +105,7 @@
     (swap! state assoc :file file)
     (filewatcher state)))
 
-(defn component-main [state mod-file metadata duration json-file wav-data-uri]
+(defn component-main [state]
   [:div
    [:h1 "ÄlgoTracker"]
    (let [ui (:ui @state)]
@@ -80,14 +118,15 @@
             The output is an Amiga Protracker mod file you can download and a wave file that you can listen to and download.
             The whole thing runs client side in the browser."]
         [:p "The next step is to build generators for producing the json structure algorithmically."]]))
-   [:<>
-    [:h3 "small.mod (" duration "s)"]
-    [:p
-     "Generated from " [:a {:href (js/URL.createObjectURL json-file) :download "small.mod.json"} "small.mod.json"] ". "
-     "Download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"] ". "
-     "Download " [:a {:href wav-data-uri :download "small.wav"} "small.wav"] "."]
-    [:audio {:src wav-data-uri :controls true :loop true}]
-    [:pre (js/JSON.stringify metadata nil 2)]]
+   (let [[mod-file metadata duration json-file wav-data-uri] (:render @state)]
+     [:<>
+      [:h3 "small.mod (" duration "s)"]
+      [:p
+       "Generated from " [:a {:href (js/URL.createObjectURL json-file) :download "small.mod.json"} "small.mod.json"] ". "
+       "Download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"] ". "
+       "Download " [:a {:href wav-data-uri :download "small.wav"} "small.wav"] "."]
+      [:audio {:src wav-data-uri :controls true :loop true}]
+      [:pre (js/JSON.stringify metadata nil 2)]])
    [:div
     [:label {:for "watcher"}
      [:p "Open .cljs file"]
@@ -102,30 +141,14 @@
                    #js {:content-type "text/plain"}))}
      "Download template.cljs"]]])
 
-(defn render-mod [mod-json]
-  (p/let [mod-data (->
-                     mod-json
-                     load-json
-                     save-mod)
-          mod-file (js/File. #js [mod-data] #js {:name "small.mod" :content-type "audio/x-mod"})
-          json-file (js/File. #js [mod-json] #js {:name "small.mod.json" :content-type "application/json"})
-          module (load-mod mod-data)
-          metadata (get-metadata module)
-          duration (get-duration module)
-          rendered (render-song module)
-          wav (buffers-to-wave rendered)
-          wav-data-uri (.toDataURI wav)]
-    (._openmpt_module_destroy js/libopenmpt module)
-    (js/console.log "raw-audio" (clj->js rendered))
-    [mod-file metadata duration json-file wav-data-uri]))
-
 (defn start {:dev/after-load true} []
   (p/let [mpt (.then mpt-promise)
           _ (js/console.log "libopenmpt loaded:" mpt)
           mod-json (rc/inline "small.mod.json")
-          [mod-file metadata duration json-file wav-data-uri] (render-mod mod-json)]
+          render (render-mod mod-json)]
+    (swap! state assoc :render render)
     (js/console.log "mod-json" (js/JSON.parse mod-json))
-    (rdom/render [component-main state mod-file metadata duration json-file wav-data-uri]
+    (rdom/render [component-main state]
                  (js/document.getElementById "app"))))
 
 (defn main! []
