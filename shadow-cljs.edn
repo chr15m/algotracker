@@ -21,4 +21,3 @@
                       :exclude #{cljs.js}
                       :entries [cljs.js #_ demo.macro reagent.core promesa.core applied-science.js-interop]
                       :macros []}}}
-
