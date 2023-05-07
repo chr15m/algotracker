@@ -71,7 +71,8 @@
   [:div
    [:h1 "ÄlgoTracker"]
    (let [ui (:ui @state)]
-     (if ui [ui state]
+     (if ui
+       [:div.user-ui-wrapper [ui state]]
        [:<>
         [:p "Algorithmic tracker music generator."]
         [:p "This is currently a proof-of-concept.
