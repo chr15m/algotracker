@@ -19,6 +19,6 @@
                       :output-dir "public/bootstrap"
                       :release {:output-dir "build/public/bootstrap"}
                       :exclude #{cljs.js}
-                      :entries [cljs.js #_ demo.macro reagent.core]
+                      :entries [cljs.js #_ demo.macro reagent.core promesa.core applied-science.js-interop]
                       :macros []}}}
 

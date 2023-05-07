@@ -1,5 +1,5 @@
 (ns algotracker.ui
-  (:require ;[applied-science.js-interop :as j]
+  (:require [applied-science.js-interop :as j]
             [promesa.core :as p]
             [reagent.core :as r]
             [reagent.dom :as rdom]
@@ -20,8 +20,8 @@
   (js/Promise.
     (fn [res err]
       (let [reader (js/FileReader.)]
-        (aset reader "onload" #(res (.. % -target -result)))
-        (aset reader "onerror" #(err "FileReader error" %))
+        (j/assoc! reader :onload #(res (.. % -target -result)))
+        (j/assoc! reader :onerror #(err "FileReader error" %))
         (.readAsText reader file "utf-8")))))
 
 (defn get-file-time [file]
@@ -36,7 +36,7 @@
         last-mod (@state :last)]
     (when file
       (p/let [[content updated]
-              (if (aget file "text")
+              (if (j/get file :text)
                 ; firefox (lastModified does not update)
                 ; and FileReader produces errors on changed file
                 ; so use sha512 hash of file instead
@@ -54,45 +54,39 @@
               {:keys [value error] :as _result} (when content (compile-code content))]
         (cond error (throw error)
               value (do
+                      (print "New generator cljs file loaded.")
                       (print _result)
-                      (when updated (swap! state assoc :last updated))
+                      (swap! state assoc :last (or updated last-mod) :ui (j/get value :ui))
                       (when value
                         (value.hello "testing")
                         (print (value.other)))))))))
 
 (defn file-selected! [state ev]
   (let [input (.. ev -target)
-        file (and (.-files input)
-                  (aget (.-files input) 0))]
+        file (j/get-in input [:files 0])]
     (js/console.log "Loading:" file)
     (swap! state assoc :file file)
     (filewatcher state)))
 
-#_ (defn watch-cljs-file [ev]
-  (js/console.log ev)
-  (js/console.log (-> ev .-target .-files))
-  #_ (p/let [files (-> ev .-target .-files)
-             file (first files)
-             test-code (rc/inline "test-code.cljs")
-             {:keys [value _error] :as _result} (compile-code test-code)]
-       (js/console.log (value.hullo "thingo"))))
-
-(defn component-main [_state mod-file metadata duration json-file wav-data-uri]
+(defn component-main [state mod-file metadata duration json-file wav-data-uri]
   [:div
    [:h1 "ÄlgoTracker"]
-   [:p "Algorithmic tracker music generator."]
-   [:p "This is currently a proof-of-concept.
-       The input is a json file containing base64 encoded samples and note position data.
-       The output is an Amiga Protracker mod file you can download and a wave file that you can listen to and download.
-       The whole thing runs client side in the browser."]
-   [:p "The next step is to build generators for producing the json structure algorithmically."]
-   [:h3 "small.mod (" duration "s)"]
-   [:p
-    "Generated from " [:a {:href (js/URL.createObjectURL json-file) :download "small.mod.json"} "small.mod.json"] ". "
-    "Download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"] ". "
-    "Download " [:a {:href wav-data-uri :download "small.wav"} "small.wav"] "."]
-   [:audio {:src wav-data-uri :controls true :loop true}]
-   [:pre (js/JSON.stringify metadata nil 2)]
+   (let [ui (:ui @state)]
+     (if ui [ui state]
+       [:<>
+        [:p "Algorithmic tracker music generator."]
+        [:p "This is currently a proof-of-concept.
+            The input is a json file containing base64 encoded samples and note position data.
+            The output is an Amiga Protracker mod file you can download and a wave file that you can listen to and download.
+            The whole thing runs client side in the browser."]
+        [:p "The next step is to build generators for producing the json structure algorithmically."]
+        [:h3 "small.mod (" duration "s)"]
+        [:p
+         "Generated from " [:a {:href (js/URL.createObjectURL json-file) :download "small.mod.json"} "small.mod.json"] ". "
+         "Download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"] ". "
+         "Download " [:a {:href wav-data-uri :download "small.wav"} "small.wav"] "."]
+        [:audio {:src wav-data-uri :controls true :loop true}]
+        [:pre (js/JSON.stringify metadata nil 2)]]))
    [:div
     [:label {:for "watcher"}
      [:p "Open .cljs file"]
