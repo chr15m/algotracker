@@ -3,8 +3,8 @@
 (defn ui [_state]
   ; Put your Reagent format user interface in here.
   [:<>
-   [:div "hello"]
-   [:p "This is a thing."]])
+   [:h3 "Example generator"]
+   [:p "This is where the generator's UI goes."]])
 
 (defn make-sample-set [_state]
   ; Return an array of audio file data
@@ -16,7 +16,12 @@
 
 (defn make-patterns [_state]
   ; return pattern data referencing the samples created previously
-  )
+  [; channel 1
+   (for [_i (range 64)]
+     {:note :E-6 :sample 12 :fx 0x00})
+   ; channel 2
+   (for [_i (range 64)]
+     {:note :F#5 :sample 17 :fx 0x00})])
 
 #js {:ui ui
      :make-sample-set make-sample-set
