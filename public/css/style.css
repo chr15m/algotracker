@@ -39,6 +39,21 @@ a {
   background-color: rgba(255, 255, 255, 0.1);
   border-radius: 6px;
   padding: 0.25em 1em;
+  position: relative;
+}
+
+.ui-loader {
+  position: absolute;
+  top: 0px;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border: 2px solid pink;
+  border-radius: 6px;
+  margin-left: -1em;
+  background-color: rgba(0, 0, 0, 0.5);
 }
 
 /*** loader ***/
@@ -49,7 +64,7 @@ a {
   align-items: center;
 }
 
-#loading div {
+#loading div, .ui-loader div {
   animation: spin 0.33s linear infinite;
   width: 48px;
   height: 48px;

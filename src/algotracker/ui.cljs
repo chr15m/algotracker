@@ -53,50 +53,60 @@
          (for [pattern patterns]
            (let [cell (nth pattern i)]
              (merge
-               {:note :C-6
-                :semitone 60
-                :sample 0
-                :fx 0x000}
+               {:note ""
+                :semitone -1
+                :sample nil
+                :fx nil}
                cell))))
        (range 64))]))
 
 (defn filewatcher [state]
-  (let [file (@state :file)
-        last-mod (@state :last)]
-    (when file
-      (p/let [[content updated]
-              (if (j/get file :text)
-                ; firefox (lastModified does not update)
-                ; and FileReader produces errors on changed file
-                ; so use sha512 hash of file instead
-                (p/let [content (.text file)
-                        updated (sha512-string content)]
-                  (when (not= updated last-mod)
-                    (js/console.log "read file (firefox method):" content)
-                    [content updated]))
-                ; chrome - can re-read the modified file without errors
-                (p/let [updated (get-file-time file)]
-                  (when (not= updated last-mod)
-                    (p/let [content (read-file file)]
-                      (js/console.log "read file (chrome method):" content)
-                      [content updated]))))
-              {:keys [value error] :as _result} (when content (compile-code content))]
-        (cond error (throw error)
-              value (p/let [mod-json-original (rc/inline "small.mod.json")
-                            mod-json (js/JSON.parse mod-json-original)
-                            patterns (j/call value :make-patterns state)
-                            mod-json (j/assoc! mod-json :tables (process-patterns patterns))
-                            mod-json (j/assoc! mod-json :channelCount (count patterns))
-                            mod-json (j/assoc! mod-json)
-                            render (render-mod (js/JSON.stringify mod-json))]
-                      (print "New generator cljs file loaded.")
-                      (js/console.log (js/JSON.parse mod-json-original))
-                      (js/console.log mod-json)
-                      (print _result)
-                      (swap! state assoc :last (or updated last-mod) :ui (j/get value :ui) :render render)
-                      ;(j/call value :make-sample-set state)
-                      ;(j/call value :make-pattern-settings state)
-                      ))))))
+  (when (not (:filewatcher @state))
+    (swap! state assoc :filewatcher true)
+    (let [exit-fn #(swap! state dissoc :filewatcher)]
+      (p/catch
+        (p/let [file (@state :file)
+                last-mod (@state :last)]
+          (when file
+            (p/let [[content updated]
+                    (if (j/get file :text)
+                      ; firefox (lastModified does not update)
+                      ; and FileReader produces errors on changed file
+                      ; so use sha512 hash of file instead
+                      (p/let [content (.text file)
+                              updated (sha512-string content)]
+                        (when (not= updated last-mod)
+                          (js/console.log "read file (firefox method):" content)
+                          [content updated]))
+                      ; chrome - can re-read the modified file without errors
+                      (p/let [updated (get-file-time file)]
+                        (when (not= updated last-mod)
+                          (p/let [content (read-file file)]
+                            (js/console.log "read file (chrome method):" content)
+                            [content updated]))))
+                    {:keys [value error] :as _result} (when content (compile-code content))]
+              (cond error (throw error)
+                    value (p/do!
+                            (swap! state assoc :loading true)
+                            (js/console.log "loading started")
+                            (p/delay 100)
+                            (p/let [mod-json-original (rc/inline "small.mod.json")
+                                    mod-json (js/JSON.parse mod-json-original)
+                                    patterns (j/call value :make-patterns state)
+                                    mod-json (j/assoc! mod-json :tables (process-patterns patterns))
+                                    mod-json (j/assoc! mod-json :channelCount (count patterns))
+                                    mod-json (j/assoc! mod-json)
+                                    render (render-mod (js/JSON.stringify mod-json))]
+                              (print "New generator cljs file loaded.")
+                              (js/console.log (js/JSON.parse mod-json-original))
+                              (js/console.log mod-json)
+                              (print _result)
+                              (swap! state assoc :last (or updated last-mod) :ui (j/get value :ui) :render render :loading false)
+                              ;(j/call value :make-sample-set state)
+                              ;(j/call value :make-pattern-settings state)
+                              )))))
+          (exit-fn))
+        exit-fn))))
 
 (defn file-selected! [state ev]
   (let [input (.. ev -target)
@@ -110,7 +120,10 @@
    [:h1 "ÄlgoTracker"]
    (let [ui (:ui @state)]
      (if ui
-       [:div.user-ui-wrapper [ui state]]
+       [:div.user-ui-wrapper
+        [:<>
+         [ui state]
+         (when (:loading @state) [:div.ui-loader [:div]])]]
        [:<>
         [:p "Algorithmic tracker music generator."]
         [:p "This is currently a proof-of-concept.
@@ -153,5 +166,5 @@
 
 (defn main! []
   ; TODO: wait for promises to prevent parallel runs
-  (js/setInterval #(filewatcher state) 100)
+  (js/setInterval #(filewatcher state) 23)
   (start))
