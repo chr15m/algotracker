@@ -15422,27 +15422,27 @@ function $sitefox$web$create_store$$($kv$jscomp$1$$) {
   return $e$jscomp$186$$;
 }
 function $sitefox$web$add_default_middleware$$($app$jscomp$1$$) {
-  var $kv_session_16766_logs_16764$$ = $shadow$js$shim$module$0path$$.join($sitefox$web$server_dir$$, "/logs"), $access_log_16765$$ = $shadow$js$shim$module$0rotating_file_stream$$.createStream("access.log", {interval:"7d", path:$kv_session_16766_logs_16764$$});
-  $kv_session_16766_logs_16764$$ = new $shadow$js$shim$module$0keyv$$($sitefox$db$database_url$$, $cljs$core$clj__GT_js$$(new $cljs$core$PersistentArrayMap$$(null, 1, [$cljs$cst$457$namespace$$, "session"], null)));
-  var $store_16767$$ = $sitefox$web$create_store$$($kv_session_16766_logs_16764$$);
+  var $kv_session_7467_logs_7465$$ = $shadow$js$shim$module$0path$$.join($sitefox$web$server_dir$$, "/logs"), $access_log_7466$$ = $shadow$js$shim$module$0rotating_file_stream$$.createStream("access.log", {interval:"7d", path:$kv_session_7467_logs_7465$$});
+  $kv_session_7467_logs_7465$$ = new $shadow$js$shim$module$0keyv$$($sitefox$db$database_url$$, $cljs$core$clj__GT_js$$(new $cljs$core$PersistentArrayMap$$(null, 1, [$cljs$cst$457$namespace$$, "session"], null)));
+  var $store_7468$$ = $sitefox$web$create_store$$($kv_session_7467_logs_7465$$);
   $app$jscomp$1$$.use(function() {
-    var $G__16727$$ = {secret:$sitefox$util$env$cljs$0core$0IFn$0_invoke$0arity$0variadic$$("SECRET", $cljs$core$prim_seq$cljs$0core$0IFn$0_invoke$0arity$02$$(["DEVMODE"])), saveUninitialized:!1, resave:!0, cookie:{secure:"auto", httpOnly:!0, maxAge:31536E7}, store:$store_16767$$};
-    return $shadow$js$shim$module$0express_session$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0express_session$$.$cljs$core$IFn$_invoke$arity$1$($G__16727$$) : $shadow$js$shim$module$0express_session$$.call(null, $G__16727$$);
+    var $G__7428$$ = {secret:$sitefox$util$env$cljs$0core$0IFn$0_invoke$0arity$0variadic$$("SECRET", $cljs$core$prim_seq$cljs$0core$0IFn$0_invoke$0arity$02$$(["DEVMODE"])), saveUninitialized:!1, resave:!0, cookie:{secure:"auto", httpOnly:!0, maxAge:31536E7}, store:$store_7468$$};
+    return $shadow$js$shim$module$0express_session$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0express_session$$.$cljs$core$IFn$_invoke$arity$1$($G__7428$$) : $shadow$js$shim$module$0express_session$$.call(null, $G__7428$$);
   }());
   $app$jscomp$1$$.use(function() {
-    var $G__16729$$ = {stream:$access_log_16765$$};
-    return $shadow$js$shim$module$0morgan$$.$cljs$core$IFn$_invoke$arity$2$ ? $shadow$js$shim$module$0morgan$$.$cljs$core$IFn$_invoke$arity$2$("combined", $G__16729$$) : $shadow$js$shim$module$0morgan$$.call(null, "combined", $G__16729$$);
+    var $G__7430$$ = {stream:$access_log_7466$$};
+    return $shadow$js$shim$module$0morgan$$.$cljs$core$IFn$_invoke$arity$2$ ? $shadow$js$shim$module$0morgan$$.$cljs$core$IFn$_invoke$arity$2$("combined", $G__7430$$) : $shadow$js$shim$module$0morgan$$.call(null, "combined", $G__7430$$);
   }());
   $app$jscomp$1$$.set("trust proxy", "loopback");
   $app$jscomp$1$$.use(function() {
-    var $G__16730$$ = $sitefox$util$env$cljs$0core$0IFn$0_invoke$0arity$0variadic$$("SECRET", $cljs$core$prim_seq$cljs$0core$0IFn$0_invoke$0arity$02$$(["DEVMODE"]));
-    return $shadow$js$shim$module$0cookie_parser$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0cookie_parser$$.$cljs$core$IFn$_invoke$arity$1$($G__16730$$) : $shadow$js$shim$module$0cookie_parser$$.call(null, $G__16730$$);
+    var $G__7431$$ = $sitefox$util$env$cljs$0core$0IFn$0_invoke$0arity$0variadic$$("SECRET", $cljs$core$prim_seq$cljs$0core$0IFn$0_invoke$0arity$02$$(["DEVMODE"]));
+    return $shadow$js$shim$module$0cookie_parser$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0cookie_parser$$.$cljs$core$IFn$_invoke$arity$1$($G__7431$$) : $shadow$js$shim$module$0cookie_parser$$.call(null, $G__7431$$);
   }());
   $app$jscomp$1$$.use($shadow$js$shim$module$0body_parser$$.json({limit:"10mb", extended:!0, parameterLimit:1000}));
   $app$jscomp$1$$.use($shadow$js$shim$module$0body_parser$$.urlencoded({extended:!0}));
   $app$jscomp$1$$.use(function() {
-    var $G__16731$$ = {cookie:{httpOnly:!0}};
-    return $shadow$js$shim$module$0csurf$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0csurf$$.$cljs$core$IFn$_invoke$arity$1$($G__16731$$) : $shadow$js$shim$module$0csurf$$.call(null, $G__16731$$);
+    var $G__7432$$ = {cookie:{httpOnly:!0}};
+    return $shadow$js$shim$module$0csurf$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0csurf$$.$cljs$core$IFn$_invoke$arity$1$($G__7432$$) : $shadow$js$shim$module$0csurf$$.call(null, $G__7432$$);
   }());
   $app$jscomp$1$$.use(function($req$jscomp$1$$, $res$jscomp$23$$, $done$jscomp$1$$) {
     $res$jscomp$23$$.cookie.call($res$jscomp$23$$, "XSRF-TOKEN", $req$jscomp$1$$.csrfToken.call($req$jscomp$1$$));
@@ -15453,9 +15453,9 @@ function $sitefox$web$add_default_middleware$$($app$jscomp$1$$) {
 }
 function $sitefox$web$static_folder$$($app$jscomp$2$$) {
   var $JSCompiler_temp_const$jscomp$255$$ = $app$jscomp$2$$.use;
-  var $G__16732$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$ = $shadow$js$shim$module$0path$$.join($sitefox$web$server_dir$$, "public");
-  $G__16732$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$ = $shadow$js$shim$module$0serve_static$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0serve_static$$.$cljs$core$IFn$_invoke$arity$1$($G__16732$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$) : $shadow$js$shim$module$0serve_static$$.call(null, $G__16732$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$);
-  $JSCompiler_temp_const$jscomp$255$$.call($app$jscomp$2$$, "/", $G__16732$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$);
+  var $G__7433$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$ = $shadow$js$shim$module$0path$$.join($sitefox$web$server_dir$$, "public");
+  $G__7433$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$ = $shadow$js$shim$module$0serve_static$$.$cljs$core$IFn$_invoke$arity$1$ ? $shadow$js$shim$module$0serve_static$$.$cljs$core$IFn$_invoke$arity$1$($G__7433$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$) : $shadow$js$shim$module$0serve_static$$.call(null, $G__7433$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$);
+  $JSCompiler_temp_const$jscomp$255$$.call($app$jscomp$2$$, "/", $G__7433$jscomp$inline_1133_JSCompiler_inline_result$jscomp$257$$);
   return $app$jscomp$2$$;
 }
 function $sitefox$web$reset_routes$$($app$jscomp$3$$) {
@@ -15467,17 +15467,17 @@ function $sitefox$web$serve$$($app$jscomp$4$$) {
   var $host$$ = $sitefox$util$env$cljs$0core$0IFn$0_invoke$0arity$0variadic$$("BIND_ADDRESS", $cljs$core$prim_seq$cljs$0core$0IFn$0_invoke$0arity$02$$(["127.0.0.1"])), $port$jscomp$1$$ = $sitefox$util$env$cljs$0core$0IFn$0_invoke$0arity$0variadic$$("PORT", $cljs$core$prim_seq$cljs$0core$0IFn$0_invoke$0arity$02$$(["8000"])), $server$$ = $shadow$js$shim$module$0http$$.createServer($app$jscomp$4$$);
   return new Promise(function($res$jscomp$24$$) {
     return $server$$.listen($port$jscomp$1$$, $host$$, function() {
-      var $G__16733$$ = new $cljs$core$PersistentVector$$(null, 3, 5, $cljs$core$PersistentVector$EMPTY_NODE$$, [$host$$, $port$jscomp$1$$, $server$$], null);
-      return $res$jscomp$24$$.$cljs$core$IFn$_invoke$arity$1$ ? $res$jscomp$24$$.$cljs$core$IFn$_invoke$arity$1$($G__16733$$) : $res$jscomp$24$$.call(null, $G__16733$$);
+      var $G__7434$$ = new $cljs$core$PersistentVector$$(null, 3, 5, $cljs$core$PersistentVector$EMPTY_NODE$$, [$host$$, $port$jscomp$1$$, $server$$], null);
+      return $res$jscomp$24$$.$cljs$core$IFn$_invoke$arity$1$ ? $res$jscomp$24$$.$cljs$core$IFn$_invoke$arity$1$($G__7434$$) : $res$jscomp$24$$.call(null, $G__7434$$);
     });
   });
 }
 function $sitefox$web$start$$() {
   var $app$jscomp$5$$ = $sitefox$web$add_default_middleware$$($shadow$js$shim$module$0express$$.$cljs$core$IFn$_invoke$arity$0$ ? $shadow$js$shim$module$0express$$.$cljs$core$IFn$_invoke$arity$0$() : $shadow$js$shim$module$0express$$.call(null));
-  return $sitefox$web$serve$$($app$jscomp$5$$).then(function($p__16734_server$jscomp$1$$) {
-    var $host$jscomp$1$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__16734_server$jscomp$1$$, 0, null), $port$jscomp$2$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__16734_server$jscomp$1$$, 1, null);
-    $p__16734_server$jscomp$1$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__16734_server$jscomp$1$$, 2, null);
-    return new $cljs$core$PersistentVector$$(null, 4, 5, $cljs$core$PersistentVector$EMPTY_NODE$$, [$app$jscomp$5$$, $host$jscomp$1$$, $port$jscomp$2$$, $p__16734_server$jscomp$1$$], null);
+  return $sitefox$web$serve$$($app$jscomp$5$$).then(function($p__7435_server$jscomp$1$$) {
+    var $host$jscomp$1$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__7435_server$jscomp$1$$, 0, null), $port$jscomp$2$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__7435_server$jscomp$1$$, 1, null);
+    $p__7435_server$jscomp$1$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__7435_server$jscomp$1$$, 2, null);
+    return new $cljs$core$PersistentVector$$(null, 4, 5, $cljs$core$PersistentVector$EMPTY_NODE$$, [$app$jscomp$5$$, $host$jscomp$1$$, $port$jscomp$2$$, $p__7435_server$jscomp$1$$], null);
   });
 }
 ;(function() {
@@ -15542,8 +15542,8 @@ function $algotracker$server$api_example$$($_req$$, $res$jscomp$28$$) {
 }
 function $algotracker$server$setup_routes$$($app$jscomp$8$$) {
   $sitefox$web$reset_routes$$($app$jscomp$8$$);
-  $app$jscomp$8$$.get.call($app$jscomp$8$$, "/mypage", function($JSCompiler_temp_const$jscomp$252_p1__16771_SHARP_$$, $p2__16770_SHARP_$$) {
-    $JSCompiler_temp_const$jscomp$252_p1__16771_SHARP_$$ = $p2__16770_SHARP_$$.send;
+  $app$jscomp$8$$.get.call($app$jscomp$8$$, "/mypage", function($JSCompiler_temp_const$jscomp$252_p1__7472_SHARP_$$, $p2__7471_SHARP_$$) {
+    $JSCompiler_temp_const$jscomp$252_p1__7472_SHARP_$$ = $p2__7471_SHARP_$$.send;
     var $reagent_forms$jscomp$inline_1137$$ = new $cljs$core$PersistentVector$$(null, 1, 5, $cljs$core$PersistentVector$EMPTY_NODE$$, [$algotracker$server$my_page$$], null), $t$jscomp$inline_1138$$ = $sitefox$deps$parse_html$$.$cljs$core$IFn$_invoke$arity$1$ ? $sitefox$deps$parse_html$$.$cljs$core$IFn$_invoke$arity$1$($algotracker$server$template$$) : $sitefox$deps$parse_html$$.call(null, $algotracker$server$template$$);
     var $el$jscomp$inline_1139$$ = $t$jscomp$inline_1138$$.querySelector("body");
     a: {
@@ -15562,15 +15562,15 @@ function $algotracker$server$setup_routes$$($app$jscomp$8$$) {
       throw Error(['HTML element not found: "', $cljs$core$str$$.$cljs$core$IFn$_invoke$arity$1$("body"), '"'].join(""));
     }
     $el$jscomp$inline_1139$$.set_content.call($el$jscomp$inline_1139$$, $rendered$jscomp$inline_1140$$);
-    return $JSCompiler_temp_const$jscomp$252_p1__16771_SHARP_$$.call($p2__16770_SHARP_$$, $t$jscomp$inline_1138$$.toString());
+    return $JSCompiler_temp_const$jscomp$252_p1__7472_SHARP_$$.call($p2__7471_SHARP_$$, $t$jscomp$inline_1138$$.toString());
   });
   $app$jscomp$8$$.get.call($app$jscomp$8$$, "/api/example.json", $algotracker$server$api_example$$);
   return $sitefox$web$static_folder$$($app$jscomp$8$$);
 }
 ;$cljs$core$apply$cljs$0core$0IFn$0_invoke$0arity$02$$(function() {
   return $promesa$protocols$_bind$$(null, function() {
-    return $promesa$protocols$_bind$$($sitefox$web$start$$(), function($p__16776$$) {
-      var $app$jscomp$9$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__16776$$, 0, null), $host$jscomp$3$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__16776$$, 1, null), $port$jscomp$3$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__16776$$, 2, null);
+    return $promesa$protocols$_bind$$($sitefox$web$start$$(), function($p__7473$$) {
+      var $app$jscomp$9$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__7473$$, 0, null), $host$jscomp$3$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__7473$$, 1, null), $port$jscomp$3$$ = $cljs$core$nth$cljs$0core$0IFn$0_invoke$0arity$03$$($p__7473$$, 2, null);
       return $promesa$protocols$_bind$$(null, function() {
         return $promesa$protocols$_bind$$($cljs$core$reset_BANG_$$($algotracker$server$server$$, $app$jscomp$9$$), function() {
           return $promesa$protocols$_bind$$($algotracker$server$setup_routes$$($app$jscomp$9$$), function() {
