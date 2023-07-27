@@ -7,9 +7,11 @@
             ["txt-tracker/loaders/json" :as load-json]
             ["crypto-js/sha512" :as sha512]
             ["crypto-js/enc-hex" :as enc-hex]
+            ["wavefile" :refer [WaveFile]]
             [shadow.resource :as rc]
             [algotracker.openmpt :refer [mpt-promise load-mod get-metadata get-duration render-song buffers-to-wave]]
-            [algotracker.runner :refer [compile-code]]))
+            [algotracker.runner :refer [compile-code]]
+            [algotracker.testmodule :refer [export]]))
 
 (defonce state (r/atom {}))
 
@@ -60,6 +62,46 @@
                cell))))
        (range 64))]))
 
+(defn process-samples [samples]
+  (p/let [samples
+          (p/all
+            (map
+              (fn [sample]
+                (p/let [sample-data (:samples sample)
+                        sample-data (js/Float32Array.from (clj->js sample-data))
+                        wave (WaveFile.)]
+                  (js/console.log "in wave")
+                  (.fromScratch
+                    wave 1 44100 "32f"
+                    #js [sample-data])
+                  (.toBitDepth wave "8")
+                  (.toRIFF wave)
+                  (assoc sample :wave (.toBase64 wave))))
+              samples))]
+    (clj->js samples)))
+
+(defn render-dynamic-module [value]
+  (js/console.log "loading started")
+  (p/let [mod-json-original (rc/inline "small.mod.json")
+          mod-json (js/JSON.parse mod-json-original)
+          samples (j/call value :make-sample-set state)
+          ;_ (js/console.log "before" (clj->js samples))
+          samples (process-samples samples)
+          ;samples (clj->js samples)
+          ;_ (js/console.log "samples" samples)
+          pattern-settings (j/call value :make-pattern-settings state)
+          patterns (j/call value :make-patterns state pattern-settings)
+          mod-json (j/assoc! mod-json :tables (process-patterns patterns))
+          mod-json (j/assoc! mod-json :channelCount (count patterns))
+          mod-json (j/assoc! mod-json :samples samples)
+          mod-json (j/assoc! mod-json)
+          render (render-mod (js/JSON.stringify mod-json))]
+    (print "New generator cljs file loaded.")
+    (js/console.log (js/JSON.parse mod-json-original))
+    (js/console.log mod-json)
+    ;(print _result)
+    render))
+
 (defn filewatcher [state]
   (when (not (:filewatcher @state))
     (swap! state assoc :filewatcher true)
@@ -87,24 +129,13 @@
                     {:keys [value error] :as _result} (when content (compile-code content))]
               (cond error (throw error)
                     value (p/do!
-                            (swap! state assoc :loading true)
-                            (js/console.log "loading started")
+                            (swap! state assoc :loading true :last (or updated last-mod))
                             (p/delay 100)
-                            (p/let [mod-json-original (rc/inline "small.mod.json")
-                                    mod-json (js/JSON.parse mod-json-original)
-                                    patterns (j/call value :make-patterns state)
-                                    mod-json (j/assoc! mod-json :tables (process-patterns patterns))
-                                    mod-json (j/assoc! mod-json :channelCount (count patterns))
-                                    mod-json (j/assoc! mod-json)
-                                    render (render-mod (js/JSON.stringify mod-json))]
-                              (print "New generator cljs file loaded.")
-                              (js/console.log (js/JSON.parse mod-json-original))
-                              (js/console.log mod-json)
-                              (print _result)
-                              (swap! state assoc :last (or updated last-mod) :ui (j/get value :ui) :render render :loading false)
-                              ;(j/call value :make-sample-set state)
-                              ;(j/call value :make-pattern-settings state)
-                              )))))
+                            (p/let [rendered (render-dynamic-module value)]
+                              (swap! state assoc
+                                     :ui (j/get value :ui)
+                                     :render rendered
+                                     :loading false))))))
           (exit-fn))
         exit-fn))))
 
@@ -157,10 +188,11 @@
 (defn start {:dev/after-load true} []
   (p/let [mpt (.then mpt-promise)
           _ (js/console.log "libopenmpt loaded:" mpt)
-          mod-json (rc/inline "small.mod.json")
-          render (render-mod mod-json)]
+          ;mod-json (rc/inline "small.mod.json")
+          ;render (render-mod mod-json)
+          render (render-dynamic-module export)]
     (swap! state assoc :render render)
-    (js/console.log "mod-json" (js/JSON.parse mod-json))
+    ;(js/console.log "mod-json" (js/JSON.parse mod-json))
     (rdom/render [component-main state]
                  (js/document.getElementById "app"))))
 

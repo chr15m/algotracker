@@ -43,7 +43,7 @@
         frame-count (* sample-rate song-duration-seconds)
         mptbuffer-ptrs (map (fn [_i] (._malloc js/libopenmpt (* 4 frame-count))) (range 2))
         actual-frames (._openmpt_module_read_float_stereo js/libopenmpt mod-ptr 44100 frame-count (first mptbuffer-ptrs) (second mptbuffer-ptrs))
-        raw-audio-arrays (map (fn [i] ; TODO use Float32Array instead and js .map
+        raw-audio-arrays (map (fn [i] ; TODO use Float32Array & js .map instead
                                 (let [buffer-ptr (nth mptbuffer-ptrs i)
                                       idx (/ buffer-ptr 4)]
                                   (-> js/libopenmpt .-HEAPF32 (.subarray idx (+ idx actual-frames)))))
