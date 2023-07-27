@@ -5,26 +5,13 @@
             [reagent.dom :as rdom]
             ["txt-tracker/savers/mod" :as save-mod]
             ["txt-tracker/loaders/json" :as load-json]
-            ["crypto-js/sha512" :as sha512]
-            ["crypto-js/enc-hex" :as enc-hex]
             ["wavefile" :refer [WaveFile]]
             [shadow.resource :as rc]
             [algotracker.openmpt :refer [mpt-promise load-mod get-metadata get-duration render-song buffers-to-wave]]
-            [algotracker.runner :refer [compile-code]]
+            ;[algotracker.runner :refer [compile-code]]
             [algotracker.testmodule :refer [export]]))
 
 (defonce state (r/atom {}))
-
-(defn sha512-string [s]
-  (.stringify enc-hex (sha512 s)))
-
-(defn read-file [file]
-  (js/Promise.
-    (fn [res err]
-      (let [reader (js/FileReader.)]
-        (j/assoc! reader :onload #(res (.. % -target -result)))
-        (j/assoc! reader :onerror #(err "FileReader error" %))
-        (.readAsText reader file "utf-8")))))
 
 (defn render-mod [mod-json]
   (p/let [mod-data (->
@@ -42,11 +29,6 @@
     (._openmpt_module_destroy js/libopenmpt module)
     (js/console.log "raw-audio" (clj->js rendered))
     [mod-file metadata duration json-file wav-data-uri]))
-
-(defn get-file-time [file]
-  (if file
-    (-> file .-lastModified js/Date. .getTime)
-    0))
 
 (defn process-patterns [patterns]
   (clj->js
@@ -102,50 +84,6 @@
     ;(print _result)
     render))
 
-(defn filewatcher [state]
-  (when (not (:filewatcher @state))
-    (swap! state assoc :filewatcher true)
-    (let [exit-fn #(swap! state dissoc :filewatcher)]
-      (p/catch
-        (p/let [file (@state :file)
-                last-mod (@state :last)]
-          (when file
-            (p/let [[content updated]
-                    (if (j/get file :text)
-                      ; firefox (lastModified does not update)
-                      ; and FileReader produces errors on changed file
-                      ; so use sha512 hash of file instead
-                      (p/let [content (.text file)
-                              updated (sha512-string content)]
-                        (when (not= updated last-mod)
-                          (js/console.log "read file (firefox method):" content)
-                          [content updated]))
-                      ; chrome - can re-read the modified file without errors
-                      (p/let [updated (get-file-time file)]
-                        (when (not= updated last-mod)
-                          (p/let [content (read-file file)]
-                            (js/console.log "read file (chrome method):" content)
-                            [content updated]))))
-                    {:keys [value error] :as _result} (when content (compile-code content))]
-              (cond error (throw error)
-                    value (p/do!
-                            (swap! state assoc :loading true :last (or updated last-mod))
-                            (p/delay 100)
-                            (p/let [rendered (render-dynamic-module value)]
-                              (swap! state assoc
-                                     :ui (j/get value :ui)
-                                     :render rendered
-                                     :loading false))))))
-          (exit-fn))
-        exit-fn))))
-
-(defn file-selected! [state ev]
-  (let [input (.. ev -target)
-        file (j/get-in input [:files 0])]
-    (js/console.log "Loading:" file)
-    (swap! state assoc :file file)
-    (filewatcher state)))
-
 (defn component-main [state]
   [:div
    [:h1 "ÄlgoTracker"]
@@ -172,12 +110,12 @@
       [:audio {:src wav-data-uri :controls true :loop true}]
       [:pre (js/JSON.stringify metadata nil 2)]])
    [:div
-    [:label {:for "watcher"}
-     [:p "Open .cljs file"]
-     [:input {:type :file
-              :name "watcher"
-              :accept ".cljs"
-              :on-change #(file-selected! state %)}]]
+    #_ [:label {:for "watcher"}
+        [:p "Open .cljs file"]
+        [:input {:type :file
+                 :name "watcher"
+                 :accept ".cljs"
+                 :on-change #(file-selected! state %)}]]
     [:a {:download "template.cljs"
          :href (js/URL.createObjectURL
                  (js/File.
@@ -190,6 +128,7 @@
           _ (js/console.log "libopenmpt loaded:" mpt)
           ;mod-json (rc/inline "small.mod.json")
           ;render (render-mod mod-json)
+          ; TODO: run render on background thread
           render (render-dynamic-module export)]
     (swap! state assoc :render render)
     ;(js/console.log "mod-json" (js/JSON.parse mod-json))
@@ -198,5 +137,5 @@
 
 (defn main! []
   ; TODO: wait for promises to prevent parallel runs
-  (js/setInterval #(filewatcher state) 23)
+  ;(js/setInterval #(filewatcher state) 23)
   (start))
