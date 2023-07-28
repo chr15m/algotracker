@@ -1,4 +1,4 @@
-An app to algorithmically generate tracker music.
+An app to algorithmically generate tracker module music files.
 
 # Dev
 
@@ -13,9 +13,12 @@ make
 cd build && node server.js
 ```
 
-# Mod JSON format
+# About the MOD format
 
 * [Protracker Module](https://wiki.multimedia.cx/index.php/Protracker_Module).
+* [MOD effect reference](https://wiki.openmpt.org/Manual:_Effect_Reference#MOD_Effect_Commands).
+
+# Mod JSON format
 
 ```json
 {
