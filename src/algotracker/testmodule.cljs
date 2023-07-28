@@ -4,8 +4,7 @@
   ; Put your Reagent format user interface in here.
   [:<>
    [:h3 "hello"]
-   [:p "This is a thing yo."]])
-
+   [:p "This is a user interface."]])
 
 (defn make-sample-set [_state]
   ; Return an array of audio file data
@@ -14,7 +13,7 @@
       {:volume 1
        :name ""
        :samples (map (fn [_i] (- (js/Math.random) 0.5)) (range 441))
-       ;:samples (map (fn [i] (js/Math.sin (/ i 882))) (range 441))
+       ;:samples (map (fn [i] (js/Math.sin (/ i 4410))) (range 441))
        ;:loopStart 0
        ;:loopLength 441
        :wave ""

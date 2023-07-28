@@ -85,52 +85,56 @@
     render))
 
 (defn component-main [state]
-  [:div
-   [:h1 "ÄlgoTracker"]
-   (let [ui (:ui @state)]
-     (if ui
-       [:div.user-ui-wrapper
+  [:<>
+   [:header {:dangerouslySetInnerHTML
+             {:__html (rc/inline "spectrum.svg")}}]
+   [:main
+    [:h1 "ÄlgoTracker"]
+    (let [ui (:ui @state)]
+      (if ui
+        [:div.user-ui-wrapper
+         [:<>
+          [ui state]
+          (when (:loading @state) [:div.ui-loader [:div]])]]
         [:<>
-         [ui state]
-         (when (:loading @state) [:div.ui-loader [:div]])]]
-       [:<>
-        [:p "Algorithmic tracker music generator."]
-        [:p "This is currently a proof-of-concept.
-            The input is a json file containing base64 encoded samples and note position data.
-            The output is an Amiga Protracker mod file you can download and a wave file that you can listen to and download.
-            The whole thing runs client side in the browser."]
-        [:p "The next step is to build generators for producing the json structure algorithmically."]]))
-   (let [[mod-file metadata duration json-file wav-data-uri] (:render @state)]
-     [:<>
-      [:h3 "small.mod (" duration "s)"]
-      [:p
-       "Generated from " [:a {:href (js/URL.createObjectURL json-file) :download "small.mod.json"} "small.mod.json"] ". "
-       "Download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"] ". "
-       "Download " [:a {:href wav-data-uri :download "small.wav"} "small.wav"] "."]
-      [:audio {:src wav-data-uri :controls true :loop true}]
-      [:pre (js/JSON.stringify metadata nil 2)]])
-   [:div
-    #_ [:label {:for "watcher"}
-        [:p "Open .cljs file"]
-        [:input {:type :file
-                 :name "watcher"
-                 :accept ".cljs"
-                 :on-change #(file-selected! state %)}]]
-    [:a {:download "template.cljs"
-         :href (js/URL.createObjectURL
-                 (js/File.
-                   #js [(rc/inline "template.cljs")]
-                   #js {:content-type "text/plain"}))}
-     "Download template.cljs"]]])
+         [:p "Algorithmic tracker music generator."]
+         [:p "This is currently a proof-of-concept.
+             The input is a json file containing base64 encoded samples and note position data.
+             The output is an Amiga Protracker mod file you can download and a wave file that you can listen to and download.
+             The whole thing runs client side in the browser."]
+         [:p "The next step is to build generators for producing the json structure algorithmically."]]))
+    (let [[mod-file metadata duration json-file wav-data-uri] (:render @state)]
+      [:<>
+       [:h3 "small.mod (" duration "s)"]
+       [:p
+        "Generated from " [:a {:href (js/URL.createObjectURL json-file) :download "small.mod.json"} "small.mod.json"] ". "
+        "Download " [:a {:href (js/URL.createObjectURL mod-file) :download "small.mod"} "small.mod"] ". "
+        "Download " [:a {:href wav-data-uri :download "small.wav"} "small.wav"] "."]
+       [:audio {:src wav-data-uri :controls true :loop true}]
+       [:pre (js/JSON.stringify metadata nil 2)]])
+    [:div
+     #_ [:label {:for "watcher"}
+         [:p "Open .cljs file"]
+         [:input {:type :file
+                  :name "watcher"
+                  :accept ".cljs"
+                  :on-change #(file-selected! state %)}]]
+     [:a {:download "template.cljs"
+          :href (js/URL.createObjectURL
+                  (js/File.
+                    #js [(rc/inline "template.cljs")]
+                    #js {:content-type "text/plain"}))}
+      "Download template.cljs"]]]])
 
 (defn start {:dev/after-load true} []
   (p/let [mpt (.then mpt-promise)
           _ (js/console.log "libopenmpt loaded:" mpt)
           ;mod-json (rc/inline "small.mod.json")
           ;render (render-mod mod-json)
-          ; TODO: run render on background thread
-          render (render-dynamic-module export)]
-    (swap! state assoc :render render)
+          ; TODO: run render on background webworker thread
+          render (render-dynamic-module export)
+          ui (:ui export)]
+    (swap! state assoc :render render :ui ui)
     ;(js/console.log "mod-json" (js/JSON.parse mod-json))
     (rdom/render [component-main state]
                  (js/document.getElementById "app"))))
