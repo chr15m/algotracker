@@ -133,7 +133,7 @@
           ;render (render-mod mod-json)
           ; TODO: run render on background webworker thread
           render (render-dynamic-module export)
-          ui (:ui export)]
+          ui (j/get export :ui)]
     (swap! state assoc :render render :ui ui)
     ;(js/console.log "mod-json" (js/JSON.parse mod-json))
     (rdom/render [component-main state]
