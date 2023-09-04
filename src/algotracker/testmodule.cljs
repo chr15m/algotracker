@@ -1,4 +1,6 @@
-(ns algotracker.testmodule)
+(ns algotracker.testmodule
+  (:require
+    [promesa.core :as p]))
 
 (defn ui [_state]
   ; Put your Reagent format user interface in here.
@@ -7,8 +9,26 @@
    [:p "This is a user interface."]])
 
 (defn make-sample-set [_state]
+  (p/all
+    (for [_ (range 2)]
+      (p/let [context (js/AudioContext.)
+              soundfile (str "sound-pack-ae/sysex-export/aut_" (-> (js/Math.random) (* 101) js/Math.floor) ".wav")
+              res (js/fetch soundfile)
+              file (.arrayBuffer res)
+              audio-buffer (.decodeAudioData context file)
+              data (.getChannelData audio-buffer 0)]
+        (js/console.log "Loading" soundfile)
+        (js/console.log data)
+        {:volume 1
+         :name ""
+         ;:samples (map (fn [_i] (- (js/Math.random) 0.5)) (range 441))
+         :samples data
+         ;:loopStart 0
+         ;:loopLength 441
+         :wave ""
+         :finetune 7})))
   ; Return an array of audio file data
-  (map
+  #_ (map
     (fn [s]
       {:volume 1
        :name ""
@@ -32,10 +52,10 @@
   ; samples indexed from 1 not 0
   [(for [i (range 64)]
      (when (= (* (mod i 4) (mod (inc i) 1)) 0)
-       {:note (rand-nth [:E-6 :G-6 :F-5]) :semitone (rand-nth [60 72 65]) :sample 1 :fx 0xEC4}))
+       {:semitone (- (rand-nth [60 72 65]) 12) :sample 1 :fx 0xEC4}))
    (for [i (range 64)]
      (when (= (* (mod i 7) (mod i 5)) 0)
-       {:note (rand-nth [:F#5 :G-6]) :semitone (rand-nth [48 60 65 67]) :sample 2 :fx 0xEC4}))])
+       {:semitone (- (rand-nth [48 60 65 67]) 12) :sample 2 :fx 0xEC4}))])
 
 (def export
   #js {:ui ui
